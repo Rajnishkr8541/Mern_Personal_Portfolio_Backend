@@ -4,6 +4,8 @@ import { User } from "../models/userSchema.js";
 import { v2 as cloudinary } from "cloudinary";
 import { generateToken } from "../utils/jwtTokens.js";
 import { sendEmail } from "../utils/sendEmail.js";
+import crypto from "crypto";
+
 
 export const register = catchAsyncErrors(async (req, res, next) => {
   if (!req.files || Object.keys(req.files).length === 0) {
@@ -251,5 +253,29 @@ export const forgotPassword = catchAsyncErrors(async(req, res, next)=>{
 
 });
 
+export const resetPassword = catchAsyncErrors(async(req, res, next)=>{
 
+  const {token} = req.params;
+  const resetPasswordToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: {$gt: Date.now()},
+  });
+
+  if(!user){
+    return next(new ErrorHandler("Reset token is invalid or has been expired!"));
+
+  }
+  if(req.body.password !== req.body.confirmPassword){
+    return next(new ErrorHandler("Password and Confirm Password Do not Matched!"));
+  }
+
+  user.password = req.body.password;
+  user.resetPasswordToken= undefined;
+  user.resetPasswordExpire = undefined;
+  await user.save();
+  generateToken(user, "Reset password Successfully!", 200, res);
+
+})
 
