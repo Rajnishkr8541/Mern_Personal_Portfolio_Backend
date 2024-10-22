@@ -1,17 +1,16 @@
 import mongoose from "mongoose";
 
-const dbConnection = ()=>{
-
-    mongoose.connect(process.env.MONGO_URI, {
-        dbName:"PORTFOLIO"
-    }).then(()=>{
-        console.log(`Database Connected`);
-        
-    }).catch((error)=>{
-        console.log(`Error occured from DB ${error}`);
-        
+// Function to connect to MongoDB
+const dbConnection = () => {
+  mongoose.connect(process.env.MONGO_URI, {
+    dbName: "PORTFOLIO", // Specifies the name of the database
+  })
+    .then(() => {
+      console.log(`Database Connected`); // Successful connection log
+    })
+    .catch((error) => {
+      console.log(`Error occurred from DB ${error}`); // Log any connection error
     });
-
 };
 
 export default dbConnection;
